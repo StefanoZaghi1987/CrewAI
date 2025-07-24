@@ -1,5 +1,6 @@
 from crewai import Agent, Crew, Process, Task
-from crewai.project import CrewBase, agent, crew, task
+from crewai.project import CrewBase, agent, crew, task, before_kickoff, after_kickoff
+#from crewai_tools import SerperDevTool
 from crewai.agents.agent_builder.base_agent import BaseAgent
 from typing import List
 # If you want to run a snippet of code before or after the crew starts,
@@ -19,11 +20,22 @@ class LatestAiDevelopment():
     
     # If you would like to add tools to your agents, you can learn more about it here:
     # https://docs.crewai.com/concepts/agents#agent-tools
+    @before_kickoff
+    def before_kickoff_function(self, inputs):
+        print(f"Before kickoff function with inputs: {inputs}")
+        return inputs # You can return the inputs or modify them as needed
+    
+    @after_kickoff
+    def after_kickoff_function(self, result):
+        print(f"After kickoff function with result: {result}")
+        return result # You can return the result or modify it as needed
+    
     @agent
     def researcher(self) -> Agent:
         return Agent(
             config=self.agents_config['researcher'], # type: ignore[index]
             verbose=True
+            #tools=[SerperDevTool()]
         )
 
     @agent
@@ -46,7 +58,7 @@ class LatestAiDevelopment():
     def reporting_task(self) -> Task:
         return Task(
             config=self.tasks_config['reporting_task'], # type: ignore[index]
-            output_file='report.md'
+            output_file='output/report.md' # This is the file that will be contain the final report.
         )
 
     @crew
